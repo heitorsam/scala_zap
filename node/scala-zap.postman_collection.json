@@ -1,0 +1,110 @@
+{
+  "info": {
+    "name": "Scala Zap API",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "base_url",
+      "value": "http://localhost:4000"
+    },
+    {
+      "key": "numero",
+      "value": "5511999999999"
+    }
+  ],
+  "item": [
+    {
+      "name": "Health Check",
+      "request": {
+        "method": "GET",
+        "url": "{{base_url}}/",
+        "description": "Verifica se a API está rodando"
+      }
+    },
+    {
+      "name": "1. Conectar WhatsApp",
+      "request": {
+        "method": "POST",
+        "url": "{{base_url}}/whatsapp/conectar",
+        "description": "Inicializa o cliente e retorna o QR code em base64 (data URL). Escaneie no celular."
+      }
+    },
+    {
+      "name": "2. Status",
+      "request": {
+        "method": "GET",
+        "url": "{{base_url}}/whatsapp/status",
+        "description": "Retorna o status atual: desconectado | inicializando | aguardando_qr | conectado"
+      }
+    },
+    {
+      "name": "3. Enviar Mensagem de Texto",
+      "request": {
+        "method": "POST",
+        "url": "{{base_url}}/whatsapp/mensagem",
+        "header": [
+          { "key": "Content-Type", "value": "application/json" }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"numero\": \"{{numero}}\",\n  \"mensagem\": \"Olá! Esta é uma mensagem de teste do Scala Zap 🚀\"\n}"
+        },
+        "description": "Envia uma mensagem de texto. Número no formato 5511999999999 (com DDI e DDD, sem +)."
+      }
+    },
+    {
+      "name": "4. Enviar Imagem por URL",
+      "request": {
+        "method": "POST",
+        "url": "{{base_url}}/whatsapp/imagem",
+        "header": [
+          { "key": "Content-Type", "value": "application/json" }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"numero\": \"{{numero}}\",\n  \"url_imagem\": \"https://upload.wikimedia.org/wikipedia/commons/thumb/4/47/PNG_transparency_demonstration_1.png/280px-PNG_transparency_demonstration_1.png\"\n}"
+        },
+        "description": "Envia uma imagem a partir de uma URL pública."
+      }
+    },
+    {
+      "name": "5. Enviar Imagem com Legenda",
+      "request": {
+        "method": "POST",
+        "url": "{{base_url}}/whatsapp/mensagem-imagem",
+        "header": [
+          { "key": "Content-Type", "value": "application/json" }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"numero\": \"{{numero}}\",\n  \"url_imagem\": \"https://upload.wikimedia.org/wikipedia/commons/thumb/4/47/PNG_transparency_demonstration_1.png/280px-PNG_transparency_demonstration_1.png\",\n  \"mensagem\": \"Legenda da imagem aqui! 📸\"\n}"
+        },
+        "description": "Envia uma imagem com legenda (caption)."
+      }
+    },
+    {
+      "name": "6. Enviar Imagem em Base64",
+      "request": {
+        "method": "POST",
+        "url": "{{base_url}}/whatsapp/imagem",
+        "header": [
+          { "key": "Content-Type", "value": "application/json" }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"numero\": \"{{numero}}\",\n  \"base64\": \"iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==\",\n  \"mimetype\": \"image/png\",\n  \"filename\": \"teste.png\"\n}"
+        },
+        "description": "Envia uma imagem em base64 (exemplo: pixel 1x1 PNG)."
+      }
+    },
+    {
+      "name": "7. Desconectar WhatsApp",
+      "request": {
+        "method": "POST",
+        "url": "{{base_url}}/whatsapp/desconectar",
+        "description": "Encerra a sessão ativa do WhatsApp."
+      }
+    }
+  ]
+}

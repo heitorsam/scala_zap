@@ -1,0 +1,133 @@
+{
+  "info": {
+    "name": "Top10All API",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "_postman_id": "f5c6b2a0-0000-0000-0000-000000000000"
+  },
+  "item": [
+    {
+      "name": "Auth",
+      "item": [
+        {
+          "name": "Register",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": { "raw": "http://localhost:4000/auth/register", "host": ["http://localhost:4000"], "path": ["auth","register"] },
+            "body": {
+              "mode": "raw",
+              "raw": "{\"nome\":\"Test\",\"email\":\"test@t.com\",\"celular\":\"123\",\"senha\":\"123456\"}"
+            }
+          }
+        },
+        {
+          "name": "Login",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": { "raw": "http://localhost:4000/auth/login", "host": ["http://localhost:4000"], "path": ["auth","login"] },
+            "body": {
+              "mode": "raw",
+              "raw": "{\"email\":\"test@t.com\",\"senha\":\"123456\"}"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Categorias",
+      "item": [
+        {
+          "name": "Listar categorias",
+          "request": { "method": "GET", "url": { "raw": "http://localhost:4000/categorias", "host": ["http://localhost:4000"], "path": ["categorias"] }, "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }] }
+        },
+        {
+          "name": "Get categoria",
+          "request": { "method": "GET", "url": { "raw": "http://localhost:4000/categorias/1", "host": ["http://localhost:4000"], "path": ["categorias","1"] }, "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }] }
+        },
+        {
+          "name": "Criar categoria",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "url": { "raw": "http://localhost:4000/categorias", "host": ["http://localhost:4000"], "path": ["categorias"] },
+            "body": { "mode": "raw", "raw": "{\"nome\":\"Nova categoria\",\"sn_ativo\":\"1\",\"id_usuario_inclusao\":1}" }
+          }
+        },
+        {
+          "name": "Atualizar categoria",
+          "request": {
+            "method": "PUT",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "url": { "raw": "http://localhost:4000/categorias/1", "host": ["http://localhost:4000"], "path": ["categorias","1"] },
+            "body": { "mode": "raw", "raw": "{\"nome\":\"Categoria modificada\",\"sn_ativo\":\"1\",\"id_usuario_alteracao\":1}" }
+          }
+        },
+        {
+          "name": "Excluir categoria",
+          "request": { "method": "DELETE", "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }], "url": { "raw": "http://localhost:4000/categorias/1", "host": ["http://localhost:4000"], "path": ["categorias","1"] } }
+        }
+      ]
+    },
+    {
+      "name": "Abrangencias",
+      "item": [
+        { "name": "GET /abrangencias", "request": { "method": "GET", "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }], "url": { "raw": "http://localhost:4000/abrangencias" } } },
+        { "name": "POST /abrangencias", "request": { "method": "POST", "header": [{ "key": "Content-Type", "value": "application/json" }, { "key": "Authorization", "value": "Bearer {{token}}" }], "url": { "raw": "http://localhost:4000/abrangencias" }, "body": { "mode": "raw", "raw": "{\"nome\":\"Global\",\"sn_ativo\":\"1\",\"id_usuario_inclusao\":1}" } } }
+      ]
+    },
+    {
+      "name": "Pais",
+      "item": [
+        { "name": "GET /pais", "request": { "method": "GET", "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }], "url": { "raw": "http://localhost:4000/pais" } } },
+        { "name": "POST /pais", "request": { "method": "POST", "header": [{ "key": "Content-Type", "value": "application/json" }, { "key": "Authorization", "value": "Bearer {{token}}" }], "url": { "raw": "http://localhost:4000/pais" }, "body": { "mode": "raw", "raw": "{\"nome\":\"Brasil\",\"sn_ativo\":\"1\",\"id_usuario_inclusao\":1}" } } }
+      ]
+    },
+    {
+      "name": "Estados",
+      "item": [
+        { "name": "GET /estados", "request": { "method": "GET", "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }], "url": { "raw": "http://localhost:4000/estados" } } },
+        { "name": "POST /estados", "request": { "method": "POST", "header": [{ "key": "Content-Type", "value": "application/json" }, { "key": "Authorization", "value": "Bearer {{token}}" }], "url": { "raw": "http://localhost:4000/estados" }, "body": { "mode": "raw", "raw": "{\"id_pais\":1,\"nome\":\"SP\",\"sn_ativo\":\"1\",\"id_usuario_inclusao\":1}" } } }
+      ]
+    },
+    {
+      "name": "Item_Votacao",
+      "item": [
+        { "name": "GET /itens-votacao", "request": { "method": "GET", "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }], "url": { "raw": "http://localhost:4000/itens-votacao" } } },
+        { "name": "POST /itens-votacao", "request": { "method": "POST", "header": [{ "key": "Content-Type", "value": "application/json" }, { "key": "Authorization", "value": "Bearer {{token}}" }], "url": { "raw": "http://localhost:4000/itens-votacao" }, "body": { "mode": "raw", "raw": "{\"id_categoria\":1,\"id_abrangencia\":1,\"nome\":\"Teste\",\"img\":\"x.jpg\",\"sn_ativo\":\"1\",\"id_usuario_inclusao\":1}" } } }
+      ]
+    },
+    {
+      "name": "Votos",
+      "item": [
+        { "name": "GET /votos", "request": { "method": "GET", "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }], "url": { "raw": "http://localhost:4000/votos" } } },
+        { "name": "POST /votos", "request": { "method": "POST", "header": [{ "key": "Content-Type", "value": "application/json" }, { "key": "Authorization", "value": "Bearer {{token}}" }], "url": { "raw": "http://localhost:4000/votos" }, "body": { "mode": "raw", "raw": "{\"id_item_votacao\":1,\"email\":\"u@u.com\",\"ip\":\"127.0.0.1\",\"user_agent\":\"Postman\",\"sn_assistiu_anuncio\":\"0\"}" } } }
+      ]
+    },
+    {
+      "name": "Usuarios",
+      "item": [
+        { "name": "GET /usuarios", "request": { "method": "GET", "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }], "url": { "raw": "http://localhost:4000/usuarios" } } }
+      ]
+    },
+    {
+      "name": "Sugestoes",
+      "item": [
+        { "name": "GET /sugestoes", "request": { "method": "GET", "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }], "url": { "raw": "http://localhost:4000/sugestoes" } } }
+      ]
+    },
+    {
+      "name": "Logs_API",
+      "item": [
+        { "name": "GET /logs-api", "request": { "method": "GET", "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }], "url": { "raw": "http://localhost:4000/logs-api" } } }
+      ]
+    }
+  ],
+  "variable": [{ "key": "token", "value": "" }]
+}

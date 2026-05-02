@@ -1,0 +1,447 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Scala Zap — Testes</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: system-ui, sans-serif;
+      background: #f0f2f5;
+      color: #111;
+      padding: 24px;
+      padding-bottom: 72px;
+    }
+
+    h1 { font-size: 1.4rem; margin-bottom: 20px; color: #128C7E; }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+      gap: 16px;
+    }
+
+    .card {
+      background: #fff;
+      border-radius: 10px;
+      padding: 18px;
+      box-shadow: 0 1px 4px rgba(0,0,0,.1);
+    }
+
+    .card h2 {
+      font-size: .95rem;
+      margin-bottom: 12px;
+      color: #075E54;
+    }
+
+    label { display: block; font-size: .8rem; color: #555; margin-bottom: 3px; margin-top: 10px; }
+
+    input, textarea {
+      width: 100%;
+      padding: 7px 10px;
+      border: 1px solid #ddd;
+      border-radius: 6px;
+      font-size: .88rem;
+    }
+
+    textarea { resize: vertical; min-height: 60px; }
+
+    button {
+      margin-top: 12px;
+      width: 100%;
+      padding: 9px;
+      background: #128C7E;
+      color: #fff;
+      border: none;
+      border-radius: 6px;
+      font-size: .9rem;
+      cursor: pointer;
+      transition: background .2s;
+    }
+
+    button:hover { background: #075E54; }
+    button:disabled { background: #aaa; cursor: not-allowed; }
+
+    .resposta {
+      margin-top: 10px;
+      background: #f6f6f6;
+      border-radius: 6px;
+      padding: 10px;
+      font-size: .78rem;
+      white-space: pre-wrap;
+      word-break: break-all;
+      max-height: 160px;
+      overflow-y: auto;
+      display: none;
+    }
+
+    .resposta.erro { color: #c0392b; background: #fdf0ef; }
+    .resposta.ok   { color: #145a32; background: #eafaf1; }
+
+    #qr-img {
+      display: none;
+      margin-top: 12px;
+      width: 100%;
+      max-width: 220px;
+      border: 2px solid #128C7E;
+      border-radius: 8px;
+    }
+
+    #status-badge {
+      display: inline-block;
+      margin-top: 10px;
+      padding: 4px 12px;
+      border-radius: 20px;
+      font-size: .8rem;
+      font-weight: 600;
+      background: #eee;
+    }
+
+    .badge-conectado    { background: #d5f5e3; color: #1a7a4a; }
+    .badge-aguardando   { background: #fef9e7; color: #9a7d0a; }
+    .badge-inicializando{ background: #eaf2ff; color: #1a5276; }
+    .badge-desconectado { background: #fadbd8; color: #922b21; }
+
+    /* ── FOOTER BAR ── */
+    #footer-bar {
+      position: fixed;
+      bottom: 0; left: 0; right: 0;
+      height: 48px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 20px;
+      font-size: .85rem;
+      font-weight: 500;
+      transition: background .4s, color .4s;
+      z-index: 100;
+      box-shadow: 0 -2px 8px rgba(0,0,0,.12);
+    }
+
+    #footer-bar.s-desconectado  { background: #922b21; color: #fff; }
+    #footer-bar.s-inicializando { background: #1a5276; color: #fff; }
+    #footer-bar.s-aguardando    { background: #9a7d0a; color: #fff; }
+    #footer-bar.s-conectado     { background: #1a7a4a; color: #fff; }
+    #footer-bar.s-offline       { background: #555;    color: #ddd; }
+
+    #footer-dot {
+      width: 10px; height: 10px;
+      border-radius: 50%;
+      background: currentColor;
+      opacity: .85;
+      flex-shrink: 0;
+    }
+
+    #footer-bar.s-conectado #footer-dot {
+      animation: pulse 1.6s ease-in-out infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: .85; transform: scale(1); }
+      50%       { opacity: .4;  transform: scale(1.4); }
+    }
+
+    #footer-text { flex: 1; margin: 0 10px; }
+    #footer-timer { font-size: .75rem; opacity: .75; white-space: nowrap; }
+
+    /* ── TOAST ── */
+    #toast {
+      position: fixed;
+      top: 20px; left: 50%;
+      transform: translateX(-50%) translateY(-80px);
+      background: #1a7a4a;
+      color: #fff;
+      padding: 14px 28px;
+      border-radius: 10px;
+      font-size: .95rem;
+      font-weight: 600;
+      box-shadow: 0 4px 16px rgba(0,0,0,.2);
+      transition: transform .35s cubic-bezier(.34,1.56,.64,1), opacity .35s;
+      opacity: 0;
+      z-index: 200;
+      pointer-events: none;
+      white-space: nowrap;
+    }
+
+    #toast.show {
+      transform: translateX(-50%) translateY(0);
+      opacity: 1;
+    }
+  </style>
+</head>
+<body>
+
+<h1>🟢 Scala Zap — Painel de Testes</h1>
+
+<div class="grid">
+
+  <!-- CONECTAR -->
+  <div class="card">
+    <h2>1. Conectar WhatsApp</h2>
+    <button onclick="conectar(this)">Conectar</button>
+    <img id="qr-img" alt="QR Code" />
+    <div id="res-conectar" class="resposta"></div>
+  </div>
+
+  <!-- STATUS -->
+  <div class="card">
+    <h2>2. Status</h2>
+    <button onclick="verStatus(this)">Ver Status</button>
+    <div id="status-badge" class="badge-desconectado">desconectado</div>
+    <div id="res-status" class="resposta"></div>
+  </div>
+
+  <!-- MENSAGEM -->
+  <div class="card">
+    <h2>3. Enviar Mensagem de Texto</h2>
+    <label>Número (DDI + DDD + número)</label>
+    <input id="msg-numero" placeholder="5511999999999" />
+    <label>Mensagem</label>
+    <textarea id="msg-texto">Olá! Teste do Scala Zap 🚀</textarea>
+    <button onclick="enviarMensagem(this)">Enviar</button>
+    <div id="res-mensagem" class="resposta"></div>
+  </div>
+
+  <!-- IMAGEM POR URL -->
+  <div class="card">
+    <h2>4. Enviar Imagem por URL</h2>
+    <label>Número</label>
+    <input id="img-numero" placeholder="5511999999999" />
+    <label>URL da Imagem</label>
+    <input id="img-url" value="https://upload.wikimedia.org/wikipedia/commons/thumb/4/47/PNG_transparency_demonstration_1.png/280px-PNG_transparency_demonstration_1.png" />
+    <button onclick="enviarImagem(this)">Enviar Imagem</button>
+    <div id="res-imagem" class="resposta"></div>
+  </div>
+
+  <!-- IMAGEM COM LEGENDA -->
+  <div class="card">
+    <h2>5. Enviar Imagem com Legenda</h2>
+    <label>Número</label>
+    <input id="imgleg-numero" placeholder="5511999999999" />
+    <label>URL da Imagem</label>
+    <input id="imgleg-url" value="https://upload.wikimedia.org/wikipedia/commons/thumb/4/47/PNG_transparency_demonstration_1.png/280px-PNG_transparency_demonstration_1.png" />
+    <label>Legenda</label>
+    <textarea id="imgleg-texto">Legenda da imagem 📸</textarea>
+    <button onclick="enviarImagemLegenda(this)">Enviar com Legenda</button>
+    <div id="res-imagem-legenda" class="resposta"></div>
+  </div>
+
+  <!-- DESCONECTAR -->
+  <div class="card">
+    <h2>6. Desconectar WhatsApp</h2>
+    <button onclick="desconectar(this)" style="background:#e74c3c">Desconectar</button>
+    <div id="res-desconectar" class="resposta"></div>
+  </div>
+
+</div>
+
+<!-- FOOTER BAR -->
+<div id="footer-bar" class="s-offline">
+  <div id="footer-dot"></div>
+  <span id="footer-text">Verificando conexão...</span>
+  <span id="footer-timer"></span>
+</div>
+
+<!-- TOAST -->
+<div id="toast"></div>
+
+<script>
+  const BASE = 'http://localhost:4000';
+
+  // ── estado global de status ──
+  let statusAtual = null;
+  let qrExibido = false;
+  let countdown = 3;
+  let timerInterval = null;
+
+  const LABELS = {
+    conectado:     '✅ WhatsApp conectado',
+    aguardando_qr: '📷 Aguardando escaneamento do QR code',
+    inicializando: '⏳ Inicializando conexão...',
+    desconectado:  '🔴 WhatsApp desconectado',
+    offline:       '⚠️ Servidor offline',
+  };
+
+  const CLASSES = {
+    conectado:     's-conectado',
+    aguardando_qr: 's-aguardando',
+    inicializando: 's-inicializando',
+    desconectado:  's-desconectado',
+    offline:       's-offline',
+  };
+
+  function mostrarToast(msg, cor = '#1a7a4a') {
+    const t = document.getElementById('toast');
+    t.textContent = msg;
+    t.style.background = cor;
+    t.classList.add('show');
+    setTimeout(() => t.classList.remove('show'), 3500);
+  }
+
+  function atualizarFooter(s) {
+    const bar  = document.getElementById('footer-bar');
+    const text = document.getElementById('footer-text');
+    bar.className = CLASSES[s] || 's-offline';
+    text.textContent = LABELS[s] || s;
+  }
+
+  const INTERVALO_RAPIDO = 3000;
+  const INTERVALO_LENTO  = 10000;
+  let pollingTimer = null;
+
+  function precisaPollingRapido(s) {
+    return s === 'inicializando' || s === 'aguardando_qr';
+  }
+
+  function iniciarContador(segundos) {
+    clearInterval(timerInterval);
+    countdown = segundos;
+    document.getElementById('footer-timer').textContent = `próxima checagem em ${countdown}s`;
+    timerInterval = setInterval(() => {
+      countdown--;
+      if (countdown > 0) {
+        document.getElementById('footer-timer').textContent = `próxima checagem em ${countdown}s`;
+      } else {
+        document.getElementById('footer-timer').textContent = 'verificando...';
+        clearInterval(timerInterval);
+      }
+    }, 1000);
+  }
+
+  function agendarProximaChecagem(s) {
+    clearTimeout(pollingTimer);
+    const delay = precisaPollingRapido(s) ? INTERVALO_RAPIDO : INTERVALO_LENTO;
+    iniciarContador(delay / 1000);
+    pollingTimer = setTimeout(checarStatus, delay);
+  }
+
+  async function checarStatus() {
+    try {
+      const r = await fetch(BASE + '/whatsapp/status');
+      const data = await r.json();
+      const novo = data.status;
+
+      if (data.qr) {
+        qrExibido = true;
+        const img = document.getElementById('qr-img');
+        img.src = data.qr;
+        img.style.display = 'block';
+      }
+
+      if (qrExibido && statusAtual !== 'conectado' && novo === 'conectado') {
+        alert('✅ WhatsApp conectado com sucesso!');
+        location.reload();
+        return;
+      }
+
+      statusAtual = novo;
+      atualizarFooter(novo);
+      atualizarBadge(novo);
+    } catch {
+      statusAtual = 'offline';
+      atualizarFooter('offline');
+    }
+
+    agendarProximaChecagem(statusAtual);
+  }
+
+  checarStatus();
+
+  // ── helpers ──
+
+  async function req(method, path, body, resEl, btn) {
+    btn.disabled = true;
+    const el = document.getElementById(resEl);
+    el.style.display = 'none';
+    el.className = 'resposta';
+    try {
+      const opts = { method, headers: { 'Content-Type': 'application/json' } };
+      if (body) opts.body = JSON.stringify(body);
+      const r = await fetch(BASE + path, opts);
+      const data = await r.json();
+      el.textContent = JSON.stringify(data, null, 2);
+      el.classList.add(r.ok ? 'ok' : 'erro');
+      el.style.display = 'block';
+      return data;
+    } catch (e) {
+      el.textContent = 'Erro de conexão: ' + e.message;
+      el.classList.add('erro');
+      el.style.display = 'block';
+      return null;
+    } finally {
+      btn.disabled = false;
+    }
+  }
+
+  function atualizarBadge(status) {
+    const badge = document.getElementById('status-badge');
+    badge.textContent = status || 'desconhecido';
+    const cls = (status || 'desconectado')
+      .replace('aguardando_qr', 'aguardando');
+    badge.className = 'badge-' + cls;
+  }
+
+  async function conectar(btn) {
+    const data = await req('POST', '/whatsapp/conectar', null, 'res-conectar', btn);
+    if (!data) return;
+    atualizarBadge(data.status);
+    const img = document.getElementById('qr-img');
+    if (data.qr) {
+      img.src = data.qr;
+      img.style.display = 'block';
+    } else {
+      img.style.display = 'none';
+    }
+  }
+
+  async function verStatus(btn) {
+    const data = await req('GET', '/whatsapp/status', null, 'res-status', btn);
+    if (!data) return;
+    atualizarBadge(data.status);
+    const img = document.getElementById('qr-img');
+    if (data.qr) {
+      img.src = data.qr;
+      img.style.display = 'block';
+    }
+  }
+
+  function enviarMensagem(btn) {
+    const numero = document.getElementById('msg-numero').value.trim();
+    const mensagem = document.getElementById('msg-texto').value.trim();
+    if (!numero || !mensagem) return alert('Preencha número e mensagem.');
+    req('POST', '/whatsapp/mensagem', { numero, mensagem }, 'res-mensagem', btn);
+  }
+
+  function enviarImagem(btn) {
+    const numero = document.getElementById('img-numero').value.trim();
+    const url_imagem = document.getElementById('img-url').value.trim();
+    if (!numero || !url_imagem) return alert('Preencha número e URL.');
+    req('POST', '/whatsapp/imagem', { numero, url_imagem }, 'res-imagem', btn);
+  }
+
+  function enviarImagemLegenda(btn) {
+    const numero = document.getElementById('imgleg-numero').value.trim();
+    const url_imagem = document.getElementById('imgleg-url').value.trim();
+    const mensagem = document.getElementById('imgleg-texto').value.trim();
+    if (!numero || !url_imagem || !mensagem) return alert('Preencha todos os campos.');
+    req('POST', '/whatsapp/mensagem-imagem', { numero, url_imagem, mensagem }, 'res-imagem-legenda', btn);
+  }
+
+  async function desconectar(btn) {
+    const data = await req('POST', '/whatsapp/desconectar', null, 'res-desconectar', btn);
+    if (data) {
+      atualizarBadge('desconectado');
+      statusAtual = 'desconectado';
+      atualizarFooter('desconectado');
+      mostrarToast('🔴 WhatsApp desconectado', '#922b21');
+      const img = document.getElementById('qr-img');
+      img.src = '';
+      img.style.display = 'none';
+    }
+  }
+</script>
+
+</body>
+</html>

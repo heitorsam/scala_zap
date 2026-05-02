@@ -1,0 +1,13 @@
+2026/05/02-14:43:53.412 5d5c Reusing MANIFEST C:\xampp\htdocs\scala_zap\node\.wwebjs_auth\session-scala-zap\Default\IndexedDB\https_web.whatsapp.com_0.indexeddb.leveldb/MANIFEST-000001
+2026/05/02-14:43:53.412 5d5c Recovering log #109
+2026/05/02-14:43:53.445 5d5c Reusing old log C:\xampp\htdocs\scala_zap\node\.wwebjs_auth\session-scala-zap\Default\IndexedDB\https_web.whatsapp.com_0.indexeddb.leveldb/000109.log 
+2026/05/02-14:44:14.053 7130 Level-0 table #117: started
+2026/05/02-14:44:14.082 7130 Level-0 table #117: 1076815 bytes OK
+2026/05/02-14:44:14.084 7130 Delete type=0 #109
+2026/05/02-14:44:15.017 7130 Compacting 1@1 + 4@2 files
+2026/05/02-14:44:15.068 7130 Generated table #118@1: 55574 keys, 2211746 bytes
+2026/05/02-14:44:15.154 7130 Generated table #119@1: 39006 keys, 2201503 bytes
+2026/05/02-14:44:15.207 7130 Generated table #120@1: 18682 keys, 2216747 bytes
+2026/05/02-14:44:15.253 7130 Generated table #121@1: 47275 keys, 1998074 bytes
+2026/05/02-14:44:15.253 7130 Compacted 1@1 + 4@2 files => 8628070 bytes
+2026/05/02-14:44:15.254 7130 compacted to: files[ 0 0 4 0 0 0 0 ]
