@@ -235,6 +235,17 @@
     <div id="res-desconectar" class="resposta"></div>
   </div>
 
+  <!-- REALIZAR PESQUISA -->
+  <div class="card">
+    <h2>7. Realizar Pesquisa</h2>
+    <label>Respondente</label>
+    <select id="pesq-respondente"><option value="">Carregando...</option></select>
+    <label>Grupo de Pesquisa</label>
+    <select id="pesq-grupo"><option value="">Carregando...</option></select>
+    <button onclick="realizarPesquisa(this)">Enviar Pesquisa pelo WhatsApp</button>
+    <div id="res-pesquisa" class="resposta"></div>
+  </div>
+
 </div>
 
 <!-- FOOTER BAR -->
@@ -287,17 +298,12 @@
     text.textContent = LABELS[s] || s;
   }
 
-  const INTERVALO_RAPIDO = 3000;
-  const INTERVALO_LENTO  = 10000;
+  const INTERVALO = 10000;
   let pollingTimer = null;
 
-  function precisaPollingRapido(s) {
-    return s === 'inicializando' || s === 'aguardando_qr';
-  }
-
-  function iniciarContador(segundos) {
+  function iniciarContador() {
     clearInterval(timerInterval);
-    countdown = segundos;
+    countdown = INTERVALO / 1000;
     document.getElementById('footer-timer').textContent = `próxima checagem em ${countdown}s`;
     timerInterval = setInterval(() => {
       countdown--;
@@ -310,11 +316,10 @@
     }, 1000);
   }
 
-  function agendarProximaChecagem(s) {
+  function agendarProximaChecagem() {
     clearTimeout(pollingTimer);
-    const delay = precisaPollingRapido(s) ? INTERVALO_RAPIDO : INTERVALO_LENTO;
-    iniciarContador(delay / 1000);
-    pollingTimer = setTimeout(checarStatus, delay);
+    iniciarContador();
+    pollingTimer = setTimeout(checarStatus, INTERVALO);
   }
 
   async function checarStatus() {
@@ -344,7 +349,7 @@
       atualizarFooter('offline');
     }
 
-    agendarProximaChecagem(statusAtual);
+    agendarProximaChecagem();
   }
 
   checarStatus();
@@ -384,16 +389,21 @@
   }
 
   async function conectar(btn) {
+    // reseta flag para que o alert de "conectado" possa disparar novamente
+    qrExibido = false;
+    document.getElementById('qr-img').style.display = 'none';
+
     const data = await req('POST', '/whatsapp/conectar', null, 'res-conectar', btn);
     if (!data) return;
     atualizarBadge(data.status);
-    const img = document.getElementById('qr-img');
+
     if (data.qr) {
+      qrExibido = true;
+      const img = document.getElementById('qr-img');
       img.src = data.qr;
       img.style.display = 'block';
-    } else {
-      img.style.display = 'none';
     }
+    // se não veio QR ainda (Puppeteer ainda subindo), o polling de 3s vai buscar
   }
 
   async function verStatus(btn) {
@@ -441,6 +451,47 @@
       img.style.display = 'none';
     }
   }
+
+  // ── Pesquisa ──
+
+  async function carregarSelects() {
+    try {
+      const [rResp, rGrupo] = await Promise.all([
+        fetch(BASE + '/pesquisa/respondentes').then(r => r.json()),
+        fetch(BASE + '/pesquisa/grupos').then(r => r.json()),
+      ]);
+
+      const selResp = document.getElementById('pesq-respondente');
+      selResp.innerHTML = '<option value="">Selecione...</option>';
+      (rResp.respondentes || []).forEach(r => {
+        const o = document.createElement('option');
+        o.value = r.id_respondente;
+        o.textContent = `${r.nome} (${r.telefone})`;
+        selResp.appendChild(o);
+      });
+
+      const selGrupo = document.getElementById('pesq-grupo');
+      selGrupo.innerHTML = '<option value="">Selecione...</option>';
+      (rGrupo.grupos || []).forEach(g => {
+        const o = document.createElement('option');
+        o.value = g.id_grupo_pesquisa;
+        o.textContent = g.nome;
+        selGrupo.appendChild(o);
+      });
+    } catch {
+      // servidor ainda pode não estar disponível ao carregar a página
+    }
+  }
+
+  async function realizarPesquisa(btn) {
+    const id_respondente   = document.getElementById('pesq-respondente').value;
+    const id_grupo_pesquisa = document.getElementById('pesq-grupo').value;
+    if (!id_respondente || !id_grupo_pesquisa) return alert('Selecione o respondente e o grupo de pesquisa.');
+    const data = await req('POST', '/pesquisa/iniciar', { id_respondente, id_grupo_pesquisa }, 'res-pesquisa', btn);
+    if (data?.ok) mostrarToast('📊 Pesquisa enviada com sucesso!');
+  }
+
+  carregarSelects();
 </script>
 
 </body>

@@ -2,6 +2,8 @@ import express, { Request, Response, NextFunction } from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
 import whatsappRoutes from './routes/whatsapp';
+import pesquisaRoutes from './routes/pesquisa';
+import { setup } from './setup';
 
 dotenv.config();
 
@@ -43,6 +45,7 @@ app.use((req: Request, res: Response, next: NextFunction) => {
 });
 
 app.use('/whatsapp', whatsappRoutes);
+app.use('/pesquisa', pesquisaRoutes);
 
 app.get('/', (req, res) => {
   res.json({ ok: true, message: 'Scala Zap API rodando' });
@@ -54,6 +57,14 @@ app.use((err: Error, req: Request, res: Response, next: NextFunction) => {
 });
 
 const port = Number(process.env.PORT || 4000);
-app.listen(port, () => {
-  console.log(`Servidor iniciado na porta ${port}`);
-});
+
+setup()
+  .then(() => {
+    app.listen(port, () => {
+      console.log(`Servidor iniciado na porta ${port}`);
+    });
+  })
+  .catch((err) => {
+    console.error('[Setup] Falha ao inicializar banco:', err.message);
+    process.exit(1);
+  });

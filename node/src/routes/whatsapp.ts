@@ -1,6 +1,7 @@
 import { Router } from 'express';
 import { Client, LocalAuth, MessageMedia } from 'whatsapp-web.js';
 import qrcode from 'qrcode';
+import { processarMensagem } from '../sessions';
 
 const router = Router();
 
@@ -10,6 +11,9 @@ let client: Client | null = null;
 let status: Status = 'desconectado';
 let qrAtual: string | null = null;
 let destruindo = false;
+
+export function getCliente(): Client | null { return client; }
+export function isConectado(): boolean { return status === 'conectado' && client !== null; }
 
 function clienteConectado(): boolean {
   return status === 'conectado' && client !== null;
@@ -69,6 +73,28 @@ router.post('/conectar', async (req, res) => {
       try { await c?.destroy(); } catch {}
     }
     destruindo = false;
+  });
+
+  client.on('message', async (msg) => {
+    if (msg.from.endsWith('@g.us')) return; // ignora grupos
+
+    let telefone: string;
+
+    if (msg.from.endsWith('@lid')) {
+      // formato linked device — resolve o número real via contato
+      try {
+        const contact = await msg.getContact();
+        telefone = contact.number;
+      } catch {
+        console.warn(`[WhatsApp] Não foi possível resolver número para ${msg.from}`);
+        return;
+      }
+    } else {
+      telefone = msg.from.replace(/@c\.us$|@s\.whatsapp\.net$/, '');
+    }
+
+    console.log(`[WhatsApp] Mensagem recebida de ${telefone}: "${msg.body.trim()}"`);
+    await processarMensagem(telefone, msg.body.trim());
   });
 
   // erros internos do Puppeteer (ex: detached Frame após logout) — não afetam o funcionamento

@@ -1,0 +1,105 @@
+Criar um setup.js se conectando ao banco mysql que será chamado toda vez que o nodejs iniciar
+
+Caso o banco já tenha sido criado ignora todo o processo da criação do banco e as respectivas regras
+
+Cria um banco chamado scala_zap
+
+Após isso, criar por padrão uma empresa, um respondente com telefone 5512981428757
+
+Cria os tipo csat e nps
+
+Cria um grupo de pesquisa com 2 perguntas nps e uma csat com as regras caso seja menor ou igual a 5 ativa a resposta escrita do motivo
+
+-------------------------------
+--Estrutura do Banco de Dados--
+-------------------------------
+
+🔹 tb_usuario
+
+id_usuario INT AUTO_INCREMENT PRIMARY KEY,
+nome VARCHAR(150),
+email VARCHAR(150),
+senha VARCHAR(255),
+perfil VARCHAR(10), -- COMUM, ADMIN
+sn_ativo CHAR(1),
+id_usuario_inclusao INT,
+dh_inclusao DATETIME,
+id_usuario_alteracao INT,
+dh_alteracao DATETIME
+
+🔹 tb_respondente
+
+id_respondente INT AUTO_INCREMENT PRIMARY KEY,
+nome VARCHAR(150),
+telefone INT,
+id_externo INT,
+id_usuario_inclusao INT,
+dh_inclusao DATETIME,
+id_usuario_alteracao INT,
+dh_alteracao DATETIME
+
+🔹 tb_empresa
+
+id_empresa INT AUTO_INCREMENT PRIMARY KEY,
+nome VARCHAR(150),
+cnpj VARCHAR(20),
+sn_ativo CHAR(1),
+id_usuario_inclusao INT,
+dh_inclusao DATETIME,
+id_usuario_alteracao INT,
+dh_alteracao DATETIME
+
+🔹 tb_grupo_pesquisa
+
+id_grupo_pesquisa INT AUTO_INCREMENT PRIMARY KEY,
+nome VARCHAR(150),
+sn_ativo CHAR(1),
+id_usuario_inclusao INT,
+dh_inclusao DATETIME,
+id_usuario_alteracao INT,
+dh_alteracao DATETIME
+
+🔹 tb_tipo_pesquisa
+
+id_tipo_pesquisa INT AUTO_INCREMENT PRIMARY KEY,
+nome VARCHAR(150),
+valor_min INT,
+valor_max INT, 
+sn_ativo CHAR(1),
+id_usuario_inclusao INT,
+dh_inclusao DATETIME,
+id_usuario_alteracao INT,
+dh_alteracao DATETIME
+
+🔹 tb_pergunta_pesquisa
+
+id_pergunta_pesquisa INT AUTO_INCREMENT PRIMARY KEY,
+id_grupo_pesquisa INT,
+id_tipo_pesquisa INT,
+nome VARCHAR(150),
+sn_pergunta_motivo CHAR(1),
+sn_regra_motivo CHAR(3), MAA - Maior, MAI - Maior Igual, III - Igual,  MEE - Menor, MEI - Menor Igual
+sn_regra_valor_motivo INT,
+sn_ativo CHAR(1),
+id_usuario_inclusao INT,
+dh_inclusao DATETIME,
+id_usuario_alteracao INT,
+dh_alteracao DATETIME
+
+🔹 tb_resposta_pesquisa
+
+id_resposta_pesquisa INT AUTO_INCREMENT PRIMARY KEY,
+id_respondente INT,
+valor INT,
+resposta_motivo VARCHAR(150),
+id_usuario_inclusao INT,
+dh_inclusao DATETIME,
+id_usuario_alteracao INT,
+dh_alteracao DATETIME
+
+
+
+
+
+
+
